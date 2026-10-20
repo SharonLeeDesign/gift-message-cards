@@ -18,10 +18,20 @@ Unattended run: nobody is watching. Don't ask questions, just do the work and fi
 ## 1. Set up (already done if you're reading this from /tmp/gift-message-cards)
 
 ```bash
-cd /tmp && curl -sSfL https://codeload.github.com/SharonLeeDesign/gift-message-cards/tar.gz/refs/heads/main | tar xz \
-  && rm -rf gift-message-cards && mv gift-message-cards-main gift-message-cards
-python3 -c "import reportlab" 2>/dev/null || pip install --quiet reportlab
+cd /tmp && rm -rf gift-message-cards && git clone --quiet --depth 1 https://github.com/SharonLeeDesign/gift-message-cards.git
+python3 -c "import reportlab" 2>/dev/null || pip install --quiet reportlab || pip install --quiet --break-system-packages reportlab
 ```
+
+The cloud task can only reach allowlisted sites (checked 20 Oct 2026):
+- **Works:** `git clone` over https and `raw.githubusercontent.com`.
+- **Blocked:** tarball downloads from `codeload.github.com`, and browsing `github.com` or `api.github.com`.
+
+If `git clone` ever fails, fetch the files one by one from `https://raw.githubusercontent.com/SharonLeeDesign/gift-message-cards/main/<path>`. The paths are:
+- `RUNBOOK.md`
+- `generate_gift_cards.py`
+- `assets/vine.png`
+- `fonts/EBGaramond-Regular.ttf`
+- `fonts/EBGaramond-Italic.ttf`
 
 Fonts (`fonts/`) and the vine (`assets/vine.png`) are in the repo. Don't install or convert fonts.
 
@@ -60,7 +70,7 @@ Run it twice and merge the results, removing duplicates by `id`:
 - Make **one card per different non-empty message** in the order. Usually that's one card. If an order has two items with different messages, make two cards, labelled e.g. `#1150 (1/2)` and `#1150 (2/2)`.
 - Skip orders with no non-empty message. Don't tag them.
 
-**If there are no cards, stop now.** Send no file and no message, and keep your final reply to one line such as "Nothing to print." Michael doesn't want "nothing to print" notifications.
+**If there are no cards, stop now, silently.** Do **not** call SendUserFile, SendUserMessage or PushNotification, and don't push a routine summary. Michael doesn't want "nothing to print" notifications. Your final reply is just "Nothing to print."
 
 ## 3. Make the PDF
 
@@ -109,3 +119,4 @@ For each order that has a card in the PDF you just sent:
 - Don't change the Shopify theme or the Flow workflow.
 - If a Shopify call fails, send one short message saying what failed. Don't retry over and over.
 - Keep the final reply to one or two sentences.
+- Notify only by sending the PDF with SendUserFile (step 4), or a short failure message if something broke. No separate push or summary on top of that.
